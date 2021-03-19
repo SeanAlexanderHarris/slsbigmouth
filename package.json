@@ -1,0 +1,28 @@
+{
+  "name": "bigmouth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "integration-test": "./node_modules/.bin/mocha tests/test_cases --reporter spec"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws4": "^1.11.0",
+    "awscred": "^1.5.0",
+    "axios": "^0.21.1",
+    "cheerio": "^1.0.0-rc.5",
+    "mustache": "^4.1.0",
+    "url-parse": "^1.5.1"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.859.0",
+    "chai": "^4.3.4",
+    "lodash": "^4.17.21",
+    "mocha": "^8.3.2",
+    "serverless": "^2.29.0",
+    "serverless-ignore": "^0.1.6",
+    "serverless-pseudo-parameters": "^2.5.0"
+  }
+}

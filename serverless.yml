@@ -1,0 +1,116 @@
+service: bigmouth
+# app and org for use with dashboard.serverless.com
+# app: big-mouth-app
+# org: seanTech
+# useDotenv: true
+
+plugins:
+  - serverless-pseudo-parameters
+  - serverless-ignore
+# You can pin your service to only deploy with a specific Serverless version
+# Check out our docs for more details
+frameworkVersion: "2"
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  lambdaHashingVersion: 20201221
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "dynamodb:scan"
+          Resource: arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/restaurants
+        # - Effect: "Allow"
+        #   Action:
+        #     - "execute-api:Invoke"
+        #   Resource: arn:aws:execute-api:#{AWS::Region}:#{AWS::AccountId}:*/*/GET/restaurants
+  apiKeys:
+    - ${opt:stage, 'dev'}-BIG_MOUTH_API_KEY
+    # usagePlan:
+    #   quota:
+    #     limit: 10
+    #     offset: 0
+    #     period: DAY
+    # throttle:
+    #   burstLimit: 200
+    #   rateLimit: 100
+functions:
+  get-index:
+    handler: functions/get-index.handler
+    events:
+      #- httpApi:
+      - http:
+          path: /
+          method: get
+    environment:
+      restaurants_api: https://hnfhcs62xf.execute-api.us-east-1.amazonaws.com/dev/restaurants
+      BIG_MOUTH_API_KEY: W7ZI5sPiLB2vDGOZJxmu0acPC4POyvqs44nq1fUw
+      cognito_user_pool_id: us-east-1_S0bYFkNE6
+      cognito_client_id: 6m8qdsf69gesal8cki1rhdaapt
+  get-restaurants:
+    handler: functions/get-restaurants.handler
+    events:
+      # - httpApi:
+      - http:
+          path: /restaurants
+          method: get
+          # when private=true, x-api-header of the api gateway generated token is required to access the endpoint
+          private: true
+          # authorizer: aws_iam
+    environment:
+      restaurants_table: restaurants
+  search-restaurants:
+    handler: functions/search-restaurants.handler
+    events:
+      # - httpApi:
+      - http:
+          path: /restaurants/search
+          method: post
+          authorizer:
+            arn: arn:aws:cognito-idp:us-east-1:335852384928:userpool/us-east-1_S0bYFkNE6
+    environment:
+      restaurants_table: restaurants
+#    The following are a few example events you can configure
+#    NOTE: Please make sure to change your handler code to work with those events
+#    Check the event documentation for details
+#    events:
+#      - httpApi:
+#          path: /users/create
+#          method: get
+#      - websocket: $connect
+#      - s3: ${env:BUCKET}
+#      - schedule: rate(10 minutes)
+#      - sns: greeter-topic
+#      - stream: arn:aws:dynamodb:region:XXXXXX:table/foo/stream/1970-01-01T00:00:00.000
+#      - cloudwatchEvent:
+#          event:
+#            source:
+#              - "aws.ec2"
+#            detail-type:
+#              - "EC2 Instance State-change Notification"
+#            detail:
+#              state:
+#                - pending
+#      - cloudwatchLog: '/aws/lambda/hello'
+#      - cognitoUserPool:
+#          pool: MyUserPool
+#          trigger: PreSignUp
+
+# you can add CloudFormation resource templates here
+resources:
+  Resources:
+    restaurantsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: restaurants
+        AttributeDefinitions:
+          - AttributeName: name
+            AttributeType: S
+        KeySchema:
+          - AttributeName: name
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
