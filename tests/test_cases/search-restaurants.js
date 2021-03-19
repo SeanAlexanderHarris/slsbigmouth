@@ -32,7 +32,7 @@ describe("Search Restaurants Tests", () => {
           expect(res.statusCode).to.equal(200);
           expect(res.body).to.not.be.null;
 
-          console.log("SEE ME", res);
+          // console.log("SEE ME", res);
 
           var responseBody = JSON.parse(res.body);
 
